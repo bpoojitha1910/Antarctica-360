@@ -179,6 +179,40 @@ body {
   color: #ffffff !important;
 }
 
+/* Keep the custom progress track as the only visible slider bar. */
+.what-if-slider {
+  position: relative;
+  z-index: 1;
+  height: 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.what-if-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  background: transparent;
+}
+
+.what-if-slider::-moz-range-track {
+  height: 8px;
+  background: transparent;
+}
+
+.what-if-slider::-webkit-slider-thumb {
+  width: 0;
+  height: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.what-if-slider::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: 0;
+}
+
 .glass-card .text-navy-900\/50, 
 .glass-card .text-navy-900\/60, 
 .glass-card .text-navy-900\/70,

@@ -9,6 +9,7 @@ export default function WhatIfSimulatorCard() {
   const [values, setValues] = useState(whatIfDefaults);
   const [result, setResult] = useState(null);
   const [running, setRunning] = useState(false);
+  const [error, setError] = useState('');
   const sliders = [
     { icon: Thermometer, label: 'Temperature', key: 'temperature', unit: '°C', min: -50, max: 20, color: '#3B82F6' },
     { icon: Wind, label: 'Wind Speed', key: 'windSpeed', unit: 'knots', min: 0, max: 100, color: '#3B82F6' },
@@ -42,8 +43,9 @@ export default function WhatIfSimulatorCard() {
                 onChange={(event) => {
                   setValues((previous) => ({ ...previous, [key]: Number(event.target.value) }));
                   setResult(null);
+                  setError('');
                 }}
-                className="w-full accent-blue-500"
+                className="what-if-slider w-full"
                 aria-label={label}
               />
               <div className="relative h-2 bg-navy-900/5 rounded-full pointer-events-none -mt-2">
@@ -66,8 +68,11 @@ export default function WhatIfSimulatorCard() {
         disabled={running}
         onClick={async () => {
           setRunning(true);
+          setError('');
           try {
             setResult(await api.simulate({ scenario: 'Custom Weather Conditions', ...values, duration: '3 Hours' }));
+          } catch (simulationError) {
+            setError(simulationError.message);
           } finally {
             setRunning(false);
           }
@@ -78,12 +83,25 @@ export default function WhatIfSimulatorCard() {
         {running ? 'Calculating...' : 'Run Simulation'}
       </button>
       {result && (
-        <div className="mt-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-2 text-[10px] text-navy-900/70">
-          <strong>{result.riskStatus} ({result.riskScore}/100)</strong>
-          <p className="mt-1">{result.recommendations[0]}</p>
-          <p>{result.impact.outdoorOperations} outdoor operations · {result.impact.communication} communications</p>
+        <div className="mt-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-2.5 text-[10px] text-navy-900/70">
+          <strong className="text-navy-900">Predicted outcome: {result.riskStatus} ({result.riskScore}/100)</strong>
+          <p className="mt-1 text-navy-900/60">
+            For {values.temperature}°C, {values.windSpeed} knots, {values.airPressure} mbar, and {values.humidity}% humidity:
+          </p>
+          <p className="mt-1 font-semibold">Possible outcomes</p>
+          <ul className="mt-1 space-y-0.5">
+            <li>• Station safety: {result.impact.stationSafety}</li>
+            <li>• Power: {result.impact.powerAvailability}</li>
+            <li>• Outdoor operations: {result.impact.outdoorOperations}</li>
+            <li>• Communications: {result.impact.communication}</li>
+            <li>• Research: {result.impact.researchActivities}</li>
+          </ul>
+          <p className="mt-1 font-semibold">Recommended action</p>
+          <p>• {result.recommendations.join(' • ')}</p>
+          <p className="mt-1 text-navy-900/50">Factors: {result.riskFactors.join(' • ')}</p>
         </div>
       )}
+      {error && <p className="mt-2 text-[10px] text-rose-500">{error}</p>}
       <p className="text-[10px] text-navy-900/30 mt-2 text-center italic">Simulation / Modelled</p>
     </div>
   );

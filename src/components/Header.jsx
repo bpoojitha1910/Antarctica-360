@@ -80,51 +80,10 @@ export default function Header() {
               fill="url(#mountain-fill)"
             />
 
-            {/* Snow caps */}
-            <path
-              d="M125 75 L105 105 L125 97 L140 108 L165 120 Z"
-              fill="white"
-              opacity="0.9"
-            />
-
-            <path
-              d="M220 45 L195 82 L220 70 L242 88 L270 105 Z"
-              fill="white"
-              opacity="0.95"
-            />
-
-            <path
-              d="M325 55 L300 87 L325 76 L345 91 L365 95 Z"
-              fill="white"
-              opacity="0.9"
-            />
-
-            <path
-              d="M420 25 L390 68 L420 52 L445 72 L470 90 Z"
-              fill="white"
-              opacity="0.95"
-            />
-
-            <path
-              d="M520 50 L495 82 L520 70 L540 88 L560 105 Z"
-              fill="white"
-              opacity="0.85"
-            />
-
-            {/* Snow ground */}
-            <path
-              d="M0 155
-                 C100 145 180 160 270 150
-                 C370 140 470 158 600 145
-                 L600 180
-                 L0 180 Z"
-              fill="#E8F7FF"
-              opacity="0.7"
-            />
-
             {/* ============================= */}
             {/* BHARATI RESEARCH STATION */}
             {/* ============================= */}
+            <g transform="translate(0 24)">
 
             {/* Main station building */}
             <rect
@@ -353,20 +312,7 @@ export default function Header() {
               fill="#38BDF8"
             />
 
-            {/* Small snow mounds around station */}
-            <path
-              d="M220 150 Q235 135 250 150"
-              stroke="#E8F7FF"
-              strokeWidth="5"
-              opacity="0.7"
-            />
-
-            <path
-              d="M455 150 Q470 136 486 150"
-              stroke="#E8F7FF"
-              strokeWidth="5"
-              opacity="0.7"
-            />
+            </g>
 
             {/* Mountain gradient */}
             <defs>

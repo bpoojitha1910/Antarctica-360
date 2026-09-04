@@ -75,6 +75,14 @@ const scenarios = [
   },
 ];
 
+const scenarioConditions = {
+  "Severe Blizzard": { temperature: -35, windSpeed: 80, airPressure: 950, humidity: 90 },
+  "Power Outage": { temperature: -20, windSpeed: 25, airPressure: 980, humidity: 70 },
+  "Communication Failure": { temperature: -10, windSpeed: 60, airPressure: 965, humidity: 85 },
+  "Extreme Cold": { temperature: -45, windSpeed: 35, airPressure: 970, humidity: 75 },
+  "Medical Emergency": { temperature: -15, windSpeed: 20, airPressure: 990, humidity: 65 },
+};
+
 /* =========================================================
    MAIN COMPONENT
 ========================================================= */
@@ -84,6 +92,15 @@ export default function WhatIfSimulator() {
   const defaults = data?.whatIfDefaults || whatIfDefaults;
   const [selectedScenario, setSelectedScenario] =
     useState("Severe Blizzard");
+  const [customScenarioOpen, setCustomScenarioOpen] = useState(false);
+  const [customScenario, setCustomScenario] = useState({
+    name: "Severe Whiteout / Polar Storm",
+    temperature: -40,
+    windSpeed: 92,
+    airPressure: 940,
+    humidity: 98,
+    goal: "Tests structural integrity, air filtration freezing, and external equipment survivability",
+  });
 
   const [values, setValues] = useState({
     temperature: defaults.temperature,
@@ -100,6 +117,13 @@ export default function WhatIfSimulator() {
 
   const [simulationResult, setSimulationResult] =
     useState(null);
+  const [stationSystems, setStationSystems] = useState({
+    communication: "Degraded",
+    heating: "Normal",
+    powerGeneration: 60,
+    batteryLevel: 40,
+    fuelLevel: 55,
+  });
 
   /* =========================================================
      RISK CALCULATION
@@ -145,6 +169,7 @@ export default function WhatIfSimulator() {
         scenario: selectedScenario,
         ...values,
         duration: activeDuration,
+        ...stationSystems,
       });
 
       setSimulationResult(result);
@@ -240,6 +265,35 @@ export default function WhatIfSimulator() {
       : riskScore >= 40
       ? "Moderate Risk"
       : "Low Risk";
+
+  const forecastBase = simulationResult
+    ? {
+        temperature: simulationResult.inputs?.temperature ?? values.temperature,
+        windSpeed: simulationResult.inputs?.windSpeed ?? values.windSpeed,
+        airPressure: simulationResult.inputs?.airPressure ?? values.airPressure,
+        humidity: simulationResult.inputs?.humidity ?? values.humidity,
+      }
+    : values;
+  const forecastSteps = [0, 3, 6, 12, 24];
+  const forecastValues = forecastSteps.map((hours) => {
+    const temperature = forecastBase.temperature - hours * (forecastBase.temperature < -10 ? 0.12 : 0.05);
+    const windSpeed = Math.max(0, forecastBase.windSpeed + hours * 0.08);
+    const airPressure = forecastBase.airPressure - hours * 0.12;
+    const humidity = Math.min(100, forecastBase.humidity + hours * 0.15);
+    let projectedRisk = 20;
+    if (temperature < -30) projectedRisk += 20;
+    else if (temperature < -20) projectedRisk += 10;
+    if (windSpeed > 70) projectedRisk += 30;
+    else if (windSpeed > 50) projectedRisk += 20;
+    if (airPressure < 970) projectedRisk += 15;
+    if (humidity > 80) projectedRisk += 10;
+    return {
+      temperature: temperature.toFixed(1),
+      windSpeed: windSpeed.toFixed(1),
+      power: `${Math.max(10, Math.round(100 - Math.max(0, windSpeed - 25) * 1.1 - Math.max(0, -temperature - 10) * 0.5))}%`,
+      risk: Math.min(projectedRisk, 100),
+    };
+  });
 
   const riskColor =
     riskScore >= 70
@@ -345,9 +399,12 @@ export default function WhatIfSimulator() {
 
               <button
                 key={scenario.name}
-                onClick={() =>
-                  setSelectedScenario(scenario.name)
-                }
+                onClick={() => {
+                  setSelectedScenario(scenario.name);
+                  setValues(scenarioConditions[scenario.name]);
+                  setSimulationResult(null);
+                  setProgress(0);
+                }}
                 className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all duration-200
                   ${
                     active
@@ -383,7 +440,11 @@ export default function WhatIfSimulator() {
             );
           })}
 
-          <button className="border border-dashed border-blue-400/30 rounded-lg p-3 flex items-center justify-center gap-2 text-xs text-slate-400 hover:bg-blue-400/5 transition">
+          <button
+            type="button"
+            onClick={() => setCustomScenarioOpen(true)}
+            className="border border-dashed border-blue-400/30 rounded-lg p-3 flex items-center justify-center gap-2 text-xs text-slate-400 hover:bg-blue-400/5 transition"
+          >
 
             <span className="text-lg">
               ＋
@@ -394,6 +455,104 @@ export default function WhatIfSimulator() {
           </button>
 
         </div>
+
+        {customScenarioOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-sm"
+            role="presentation"
+            onClick={() => setCustomScenarioOpen(false)}
+          >
+            <form
+              className="w-full max-w-lg rounded-2xl border border-cyan-400/30 bg-[#091d38] p-5 text-white shadow-2xl"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setSelectedScenario(customScenario.name);
+                setValues({
+                  temperature: Number(customScenario.temperature),
+                  windSpeed: Number(customScenario.windSpeed),
+                  airPressure: Number(customScenario.airPressure),
+                  humidity: Number(customScenario.humidity),
+                });
+                setSimulationResult(null);
+                setProgress(0);
+                setCustomScenarioOpen(false);
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold">Create Custom Scenario</h2>
+                  <p className="mt-1 text-[11px] text-slate-400">Define the conditions you want to test.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCustomScenarioOpen(false)}
+                  className="text-xl leading-none text-slate-400 hover:text-white"
+                  aria-label="Close custom scenario dialog"
+                >
+                  ×
+                </button>
+              </div>
+
+              <label className="mb-3 block text-xs text-slate-300">
+                Scenario name
+                <input
+                  value={customScenario.name}
+                  onChange={(event) => setCustomScenario((previous) => ({ ...previous, name: event.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-blue-400/20 bg-[#071a33] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                  required
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ["temperature", "Temperature (°C)", -50, 20],
+                  ["windSpeed", "Wind speed (knots)", 0, 120],
+                  ["airPressure", "Air pressure (mbar)", 900, 1040],
+                  ["humidity", "Humidity (%)", 0, 100],
+                ].map(([key, label, min, max]) => (
+                  <label key={key} className="text-xs text-slate-300">
+                    {label}
+                    <input
+                      type="number"
+                      min={min}
+                      max={max}
+                      step="0.1"
+                      value={customScenario[key]}
+                      onChange={(event) => setCustomScenario((previous) => ({ ...previous, [key]: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-blue-400/20 bg-[#071a33] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                      required
+                    />
+                  </label>
+                ))}
+              </div>
+
+              <label className="mt-3 block text-xs text-slate-300">
+                Goal
+                <textarea
+                  value={customScenario.goal}
+                  onChange={(event) => setCustomScenario((previous) => ({ ...previous, goal: event.target.value }))}
+                  rows={3}
+                  className="mt-1 w-full resize-none rounded-lg border border-blue-400/20 bg-[#071a33] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                  required
+                />
+              </label>
+
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCustomScenarioOpen(false)}
+                  className="rounded-lg border border-blue-400/20 px-4 py-2 text-xs text-slate-300 hover:bg-blue-400/10"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-2 text-xs font-semibold">
+                  Use Scenario
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
       </div>
 
@@ -497,24 +656,24 @@ export default function WhatIfSimulator() {
             <SystemRow
               icon={Zap}
               label="Power Generation"
-              value="60%"
+              value={`${stationSystems.powerGeneration}%`}
             />
 
             <SystemRow
               icon={Battery}
               label="Battery Level"
-              value="40%"
+              value={`${stationSystems.batteryLevel}%`}
             />
 
             <SystemRow
               icon={Activity}
               label="Fuel Level"
-              value="55%"
+              value={`${stationSystems.fuelLevel}%`}
             />
 
             <div className="mt-4 space-y-2">
 
-              <select className="w-full bg-[#071a33] border border-blue-400/15 rounded-lg p-2 text-xs text-slate-300">
+              <select value={stationSystems.communication} onChange={(e) => setStationSystems((previous) => ({ ...previous, communication: e.target.value }))} className="w-full bg-[#071a33] border border-blue-400/15 rounded-lg p-2 text-xs text-slate-300">
 
                 <option>
                   Communication: Degraded
@@ -530,7 +689,7 @@ export default function WhatIfSimulator() {
 
               </select>
 
-              <select className="w-full bg-[#071a33] border border-blue-400/15 rounded-lg p-2 text-xs text-slate-300">
+              <select value={stationSystems.heating} onChange={(e) => setStationSystems((previous) => ({ ...previous, heating: e.target.value }))} className="w-full bg-[#071a33] border border-blue-400/15 rounded-lg p-2 text-xs text-slate-300">
 
                 <option>
                   Heating: Normal
@@ -792,49 +951,25 @@ export default function WhatIfSimulator() {
 
                 <ForecastRow
                   label="● Temperature (°C)"
-                  values={[
-                    "-18",
-                    "-22",
-                    "-25",
-                    "-28",
-                    "-30",
-                  ]}
+                  values={forecastValues.map((point) => point.temperature)}
                   color="text-blue-400"
                 />
 
                 <ForecastRow
                   label="● Wind Speed"
-                  values={[
-                    "32",
-                    "48",
-                    "65",
-                    "70",
-                    "55",
-                  ]}
+                  values={forecastValues.map((point) => point.windSpeed)}
                   color="text-orange-400"
                 />
 
                 <ForecastRow
                   label="● Power Availability"
-                  values={[
-                    "60%",
-                    "45%",
-                    "35%",
-                    "20%",
-                    "10%",
-                  ]}
+                  values={forecastValues.map((point) => point.power)}
                   color="text-emerald-400"
                 />
 
                 <ForecastRow
                   label="● Risk Level"
-                  values={[
-                    "22",
-                    "42",
-                    "68",
-                    "82",
-                    "90",
-                  ]}
+                  values={forecastValues.map((point) => String(point.risk))}
                   color="text-red-400"
                 />
 

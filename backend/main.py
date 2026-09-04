@@ -328,6 +328,11 @@ class SimulationRequest(BaseModel):
     airPressure: float = Field(default=965.0)
     humidity: float = Field(default=82.0)
     duration: str = "12 Hours"
+    communication: str = "Degraded"
+    heating: str = "Normal"
+    powerGeneration: float = 60
+    batteryLevel: float = 40
+    fuelLevel: float = 55
 
 @app.get("/")
 def root() -> dict[str, str]:
@@ -449,10 +454,16 @@ def simulate(request: SimulationRequest) -> dict[str, Any]:
     )
     risk_status = "High Risk" if risk >= 70 else "Moderate Risk" if risk >= 40 else "Low Risk"
 
-    power = max(10, round(100 - max(0, request.windSpeed - 25) * 1.1 - max(0, -request.temperature - 10) * 0.5))
-    battery_hours = max(1.0, round(12 - max(0, risk - 30) * 0.08, 1))
+    duration_hours = int(request.duration.split()[0])
+    power = max(0, round(request.powerGeneration - max(0, request.windSpeed - 25) * 1.1 - max(0, -request.temperature - 10) * 0.5))
+    battery_hours = max(0.0, round(request.batteryLevel / max(1, risk / 25), 1))
+    power = min(power, round(request.powerGeneration))
     outdoor_ops = "Suspended" if risk >= 70 else "Restricted" if risk >= 40 else "Normal"
-    communication = "Unstable" if risk >= 60 else "Degraded" if risk >= 35 else "Stable"
+    communication = "Offline" if request.communication == "Offline" else "Unstable" if risk >= 60 else request.communication
+    if request.heating == "Critical":
+        power = max(0, power - 15)
+    elif request.heating == "Reduced":
+        power = max(0, power - 5)
 
     return {
         "scenario": request.scenario,
@@ -466,6 +477,9 @@ def simulate(request: SimulationRequest) -> dict[str, Any]:
             "communication": communication,
             "outdoorOperations": outdoor_ops,
             "researchActivities": "Limited" if risk >= 40 else "Normal",
+            "duration": f"{duration_hours} hours evaluated",
+            "heating": request.heating,
+            "fuelLevel": f"{request.fuelLevel:.0f}%",
         },
         "riskFactors": [
             "Wind speed exceeds safe limit" if request.windSpeed >= 50 else "Wind conditions within monitored range",
