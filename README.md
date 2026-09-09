@@ -12,14 +12,6 @@ Antarctica 360 is a React/Vite dashboard for Bharati Research Station with a Pyt
 
 ### Option A — Windows one-click development launcher
 
-Double-click `start-dev.bat`.
-
-It opens:
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- API docs: http://localhost:8000/docs
-
 ### Option B — two terminals
 
 Terminal 1:
