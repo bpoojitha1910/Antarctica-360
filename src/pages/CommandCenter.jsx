@@ -5,10 +5,6 @@ import RiskGauge from '../components/RiskGauge';
 import WeatherChart from '../components/WeatherChart';
 import AlertCard from '../components/AlertCard';
 import DigitalTwinCard from '../components/DigitalTwinCard';
-import StationImpact from '../components/StationImpact';
-import WhatIfSimulatorCard from '../components/WhatIfSimulatorCard';
-import EmergencyResponse from '../components/EmergencyResponse';
-import QuickActions from '../components/QuickActions';
 import { useDashboard } from '../DashboardContext';
 
 export default function CommandCenter() {
@@ -94,12 +90,30 @@ export default function CommandCenter() {
           </div>
         </div>
 
-        {/* Bottom Row: 4 cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <StationImpact />
-          <WhatIfSimulatorCard />
-          <EmergencyResponse />
-          <QuickActions />
+        <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
+          <div className="glass-card-static p-3">
+            <span className="block text-[10px] text-slate-400">Station Status</span>
+            <strong className="mt-2 block text-xs text-emerald-300">OPERATIONAL</strong>
+          </div>
+          {[
+            ['Power', 'NORMAL', 'text-emerald-300'],
+            ['Heating', currentWeather.weatherRisk >= 50 ? 'WATCH' : 'NORMAL', 'text-amber-300'],
+            ['Water', 'NORMAL', 'text-emerald-300'],
+            ['Fuel', 'NORMAL', 'text-emerald-300'],
+            ['Communication', 'DEGRADED', 'text-amber-300'],
+            ['Outdoor Ops', currentWeather.weatherRisk >= 50 ? 'RESTRICT' : 'NORMAL', 'text-rose-300'],
+          ].map(([label, status, color]) => (
+            <div key={label} className="glass-card-static p-3">
+              <span className="block text-[10px] text-slate-400">{label}</span>
+              <strong className={`mt-2 block text-xs ${color}`}>{status}</strong>
+            </div>
+          ))}
+        </div>
+        <div className="glass-card-static mb-6 flex flex-wrap items-center gap-3 p-3 text-[10px]">
+          <strong className="text-cyan-200">Critical actions</strong>
+          <span className="text-slate-300">• Verify personnel status</span>
+          <span className="text-slate-300">• Monitor heating demand</span>
+          <span className="text-slate-300">• Restrict outdoor operations when risk is high</span>
         </div>
 
         {/* Footer tagline */}

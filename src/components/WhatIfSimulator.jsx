@@ -840,8 +840,8 @@ export default function WhatIfSimulator() {
                   <p className="text-[10px] font-semibold text-slate-200">
 
                     {isRunning
-                      ? "Running Live"
-                      : "Digital Twin Ready"}
+                      ? "Running Simulation"
+                      : "Simulation Ready"}
 
                   </p>
 
