@@ -145,10 +145,11 @@ export default function WhatIfSimulator() {
     return Math.min(Math.round(risk), 100);
   };
 
-  const riskScore =
-    simulationResult?.riskScore ?? calculateRisk();
+  const riskScore = calculateRisk();
 
   const updateValue = (key, value) => {
+    setSimulationResult(null);
+    setProgress(0);
     setValues((prev) => ({
       ...prev,
       [key]: Number(value),
@@ -933,7 +934,7 @@ export default function WhatIfSimulator() {
                 <div></div>
 
                 {[
-                  "NOW",
+                  "START",
                   "+3 HRS",
                   "+6 HRS",
                   "+12 HRS",
@@ -1212,7 +1213,7 @@ export default function WhatIfSimulator() {
           <FeatureCard
             icon={BrainCircuit}
             title="AI Scenario Generator"
-            text="Creates realistic scenarios using historical and live data."
+            text="Creates realistic scenarios using historical observations."
           />
 
           <FeatureCard

@@ -37,7 +37,7 @@ function DashboardContent({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab
         onSelectTab={setActiveTab}
       />
       <main className="flex-1 overflow-y-auto">
-        {activeTab === 'Command Center' && <CommandCenter />}
+        {activeTab === 'Command Center' && <CommandCenter onOpenRiskManagement={() => setActiveTab('Risk Management')} />}
         {activeTab === 'Digital Twin' && <DigitalTwin />}
         {activeTab === 'Weather Analytics' && <WeatherAnalytics />}
         {activeTab === 'What-If Simulator' && <WhatIfSimulator />}
