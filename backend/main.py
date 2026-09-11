@@ -303,11 +303,9 @@ def _read_excel_dataset(_file_mtime: float, _live_minute: int):
         "navigationItems": [
             {"icon": "Home", "label": "Command Center", "active": True},
             {"icon": "CloudSun", "label": "Weather Analytics", "active": False},
-            {"icon": "TriangleAlert", "label": "Risk & Alerts", "active": False},
+            {"icon": "Shield", "label": "Risk Management", "active": False},
             {"icon": "Box", "label": "Digital Twin", "active": False},
             {"icon": "FlaskConical", "label": "What-If Simulator", "active": False},
-            {"icon": "Shield", "label": "Emergency Response", "active": False},
-            {"icon": "FileText", "label": "Incident Reports", "active": False},
             {"icon": "RefreshCw", "label": "Shift Handover", "active": False},
             {"icon": "Info", "label": "About", "active": False},
         ],

@@ -4,6 +4,9 @@ import CommandCenter from './pages/CommandCenter';
 import DigitalTwin from './components/DigitalTwin';
 import WeatherAnalytics from './components/WeatherAnalytics';
 import WhatIfSimulator from './components/WhatIfSimulator';
+import RiskManagement from './pages/RiskManagement';
+import ShiftHandover from './pages/ShiftHandover';
+import About from './pages/About';
 import { DashboardProvider, useDashboard } from './DashboardContext';
 
 function DashboardContent({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab }) {
@@ -38,6 +41,9 @@ function DashboardContent({ sidebarOpen, setSidebarOpen, activeTab, setActiveTab
         {activeTab === 'Digital Twin' && <DigitalTwin />}
         {activeTab === 'Weather Analytics' && <WeatherAnalytics />}
         {activeTab === 'What-If Simulator' && <WhatIfSimulator />}
+        {activeTab === 'Risk Management' && <RiskManagement />}
+        {activeTab === 'Shift Handover' && <ShiftHandover />}
+        {activeTab === 'About' && <About />}
       </main>
     </div>
   );
