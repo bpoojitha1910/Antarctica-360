@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backend": "python -m uvicorn main:app --app-dir backend --reload --port 8000",
-    "dev:all": "concurrently \"npm run backend\" \"npm run dev\""
+    "backend": "backend\\.venv\\Scripts\\python.exe -m uvicorn main:app --app-dir backend --reload --port 8000",
+    "dev:all": "concurrently --kill-others-on-fail \"npm run backend\" \"npm run dev\""
   },
   "devDependencies": {
     "concurrently": "^10.0.5",
